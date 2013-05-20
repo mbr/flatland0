@@ -15,6 +15,7 @@ from genshi.template.interpolation import interpolate
 
 
 from flatland.out.generic import _unpack, transform, Context
+import six
 
 
 __all__ = ('setup',)
@@ -131,7 +132,7 @@ class ControlAttribute(AttributeOnly):
                     parts.append(value)
                 else:
                     value = _eval_expr(value, ctxt, vars)
-                    parts.append(unicode(value))
+                    parts.append(six.text_type(value))
             final_value = u''.join(parts)
         mapping[_to_context.get(self._name, self._name)] = final_value
 
@@ -292,7 +293,7 @@ def _rewrite_stream(stream, directives, ctxt, vars, bind):
     elif isinstance(new_contents, unicode):
         new_contents = [(TEXT, new_contents, (None, -1, -1))]
 
-    pairs = sorted(mutable_attrs.iteritems(), key=_attribute_sort_key)
+    pairs = sorted(six.iteritems(mutable_attrs), key=_attribute_sort_key)
     for attribute_name, value in pairs:
         if attribute_name in existing_attributes:
             qname = existing_attributes.pop(attribute_name)
@@ -375,7 +376,7 @@ def _simplify_stream(stream, ctxt, vars):
                 else:
                     stream[idx] = (TEXT, value, pos)
             elif not isinstance(value, unicode):
-                value = unicode(value)
+                value = six.text_type(value)
             parts.append(value)
         else:
             return stream

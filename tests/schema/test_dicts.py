@@ -13,6 +13,7 @@ from tests._util import (
     udict,
     unicode_coercion_available,
     )
+import six
 
 
 def test_dict():
@@ -64,7 +65,7 @@ def test_dict_update():
     el = schema()
 
     def value_dict(element):
-        return dict((k, v.value) for k, v in element.iteritems())
+        return dict((k, v.value) for k, v in six.iteritems(element))
 
     try:
         el.update(x=20, y=30)
@@ -342,7 +343,7 @@ def test_nested_unicode_dict_as_unicode():
         String.named(u'x').using(default=u'\u2308\u2309')))
     el = schema.from_defaults()
     eq_(el.value, {u'd': {u'x': u'\u2308\u2309'}})
-    eq_(el.u, ur"{u'd': {u'x': u'\u2308\u2309'}}")
+    eq_(el.u, u"{u'd': {u'x': u'\u2308\u2309'}}")
 
 
 def test_dict_el():
@@ -371,10 +372,11 @@ def test_update_object():
     def updated_(obj_factory, initial_value, wanted=None, **update_kw):
         el = schema(initial_value)
         obj = obj_factory()
-        update_kw.setdefault('key', asciistr)
+        keyfunc = lambda x: x if six.PY3 else asciistr(x)
+        update_kw.setdefault('key', keyfunc)
         el.update_object(obj, **update_kw)
         if wanted is None:
-            wanted = dict((asciistr(k), v) for k, v in initial_value.items())
+            wanted = dict((keyfunc(k), v) for k, v in initial_value.items())
         have = dict(obj.__dict__)
         assert have == wanted
 
@@ -403,7 +405,8 @@ def test_slice():
             set(type(_) for _ in wanted.keys()))
 
     yield same_, {u'x': u'X', u'y': u'Y'}, {}
-    yield same_, {u'x': u'X', u'y': u'Y'}, dict(key=asciistr)
+    keyfunc = lambda x: x if six.PY3 else asciistr(x)
+    yield same_, {u'x': u'X', u'y': u'Y'}, dict(key=keyfunc)
     yield same_, {u'x': u'X', u'y': u'Y'}, dict(include=[u'x'])
     yield same_, {u'x': u'X', u'y': u'Y'}, dict(omit=[u'x'])
     yield same_, {u'x': u'X', u'y': u'Y'}, dict(omit=[u'x'],
@@ -542,7 +545,7 @@ def test_sparsedict_required_key_mutability():
     assert_raises(NotImplementedError, el.popitem)
 
     el.clear()
-    assert el.keys() == [required]
+    assert list(el.keys()) == [required]
 
 
 def test_sparsedict_from_flat():
@@ -550,7 +553,7 @@ def test_sparsedict_from_flat():
                            Integer.named(u'y'))
 
     el = schema.from_flat([])
-    assert el.items() == []
+    assert list(el.items()) == []
 
     el = schema.from_flat([(u'x', u'123')])
     assert el.value == {u'x': 123}

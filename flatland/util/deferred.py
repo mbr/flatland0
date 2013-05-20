@@ -1,5 +1,6 @@
 import sys
 from types import ModuleType
+import six
 
 
 __all__ = ['deferred_module']
@@ -23,7 +24,7 @@ class deferred_module(ModuleType):
         self.__file__ = module.__file__
         self.__path__ = module.__path__
 
-        for submodule, pushed_up in deferred.iteritems():
+        for submodule, pushed_up in six.iteritems(deferred):
             self.__all__.append(submodule)
             if pushed_up:
                 for member in pushed_up:

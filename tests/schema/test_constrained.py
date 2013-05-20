@@ -1,3 +1,5 @@
+import six
+
 from flatland import (
     Constrained,
     Enum,
@@ -104,9 +106,9 @@ def test_typed_enum():
 
     for good_val in good_values:
         el = schema()
-        assert el.set(unicode(str(good_val), 'ascii'))
+        assert el.set(six.text_type(good_val))
         assert el.value == good_val
-        assert el.u == unicode(str(good_val), 'ascii')
+        assert el.u == six.text_type(good_val)
         assert not el.errors
 
     el = schema()

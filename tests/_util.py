@@ -3,6 +3,7 @@ import codecs
 from functools import wraps
 from inspect import stack
 import sys
+import six
 
 from nose.tools import eq_, assert_raises, raises
 
@@ -34,10 +35,10 @@ def fails(reason):
 
 
 def udict(*dictionary, **kwargs):
-    "Return a dict with unicode keys. A stand-in for the dict constructor."
-    kwargs = dict((k.decode('ascii'), v) for k, v in kwargs.items())
+    """Return a dict with unicode keys. A stand-in for the dict constructor."""
+    kwargs = dict((six.text_type(k), v) for k, v in kwargs.items())
     if dictionary:
-        base = dict((k.decode('ascii'), v) for k, v in dictionary[0].items())
+        base = dict((six.text_type(k), v) for k, v in dictionary[0].items())
         base.update(kwargs)
         return base
     else:

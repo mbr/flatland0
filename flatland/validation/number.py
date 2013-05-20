@@ -1,7 +1,8 @@
 from __future__ import division
 import types
-from base import N_, Validator
+from .base import N_, Validator
 import flatland.util as util
+import six
 
 
 
@@ -19,7 +20,7 @@ class NANPnxx(Validator):
                                 976,):
             return False
 
-        element.u = unicode(nxx)
+        element.u = six.text_type(nxx)
         return True
 
 class NANPnpa_nxx(Validator):
@@ -31,9 +32,9 @@ class NANPnpa_nxx(Validator):
 
     def __init__(self, npa_element, nxx_element, errors_to=None,
                  lookup='aq', method='valid_npanxx', **kw):
-        assert isinstance(npa_element, basestring)
-        assert isinstance(nxx_element, basestring)
-        assert isinstance(errors_to, (basestring, types.NoneType))
+        assert isinstance(npa_element, six.string_types)
+        assert isinstance(nxx_element, six.string_types)
+        assert isinstance(errors_to, (six.string_types, type(None)))
 
         Validator.__init__(self, *kw)
 

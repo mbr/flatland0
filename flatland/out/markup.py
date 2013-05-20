@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from flatland.out.generic import Context, transform, _unpack
 from flatland.out.util import parse_trool
+import six
 
 
 _default_settings = {u'ordered_attributes': True}
@@ -194,7 +195,7 @@ class Generator(Context):
 
         """
         if isinstance(tagname, str):  # pragma: nocover
-            tagname = unicode(tagname)
+            tagname = six.text_type(tagname)
         tagname = tagname.lower()
         if bind is None and not attributes:
             return self._tag(tagname)
@@ -270,7 +271,7 @@ class Tag(object):
         if self._context['ordered_attributes']:
             pairs = sorted(attributes.items(), key=_attribute_sort_key)
         else:
-            pairs = attributes.iteritems()
+            pairs = six.iteritems(attributes)
         guts = u' '.join(u'%s="%s"' % (k, _attribute_escape(v))
                          for k, v in pairs)
         if guts:
@@ -318,7 +319,7 @@ def _attribute_escape(string):
 def _unicode_keyed(bytestring_keyed):
     rekeyed = {}
     for key, value in bytestring_keyed.items():
-        as_unicode = key.rstrip('_').decode('ascii')
+        as_unicode = six.text_type(key).rstrip('_')
         rekeyed[as_unicode] = value
     return rekeyed
 

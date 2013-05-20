@@ -1,6 +1,7 @@
 from weakref import WeakKeyDictionary
 
 from flatland.util import symbol
+import six
 
 
 Deleted = symbol('deleted')
@@ -8,23 +9,40 @@ Deleted = symbol('deleted')
 
 class DictLike(object):
 
-    def iteritems(self):  # pragma: nocover
-        raise NotImplementedError
+    if six.PY3:
+        def items(self):  # pragma: nocover
+            raise NotImplementedError
 
-    def items(self):
-        return list(self.iteritems())
+        iteritems = items
 
-    def iterkeys(self):
-        return (item[0] for item in self.iteritems())
+        def keys(self):
+            return (item[0] for item in six.iteritems(self))
 
-    def keys(self):
-        return list(self.iterkeys())
+        iterkeys = keys
 
-    def itervalues(self):
-        return (item[1] for item in self.iteritems())
+        def values(self):
+            return (item[1] for item in six.iteritems(self))
 
-    def values(self):
-        return list(self.itervalues())
+        itervalues = values
+
+    else:
+        def iteritems(self):  # pragma: nocover
+            raise NotImplementedError
+
+        def items(self):
+            return list(six.iteritems(self))
+
+        def iterkeys(self):
+            return (item[0] for item in six.iteritems(self))
+
+        def keys(self):
+            return list(six.iterkeys(self))
+
+        def itervalues(self):
+            return (item[1] for item in six.iteritems(self))
+
+        def values(self):
+            return list(six.itervalues(self))
 
     def get(self, key, default=None):
         try:
@@ -33,16 +51,17 @@ class DictLike(object):
             return default
 
     def copy(self):
-        return dict(self.iteritems())
+        return dict(six.iteritems(self))
 
     def popitem(self):
         raise NotImplementedError
 
     def __contains__(self, key):
-        return key in self.iterkeys()
+        return key in six.iterkeys(self)
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.copy())
+    __nonzero__ = __bool__
 
     def __eq__(self, other):
         return self.copy() == other
@@ -83,7 +102,7 @@ class _TypeLookup(DictLike):
 
     def clear(self):
         frame = self._base_frame
-        for key in self.iterkeys():
+        for key in six.iterkeys(self):
             frame[key] = Deleted
 
     def pop(self, key, *default):
@@ -106,11 +125,14 @@ class _TypeLookup(DictLike):
     def iteritems(self):
         seen = set()
         for frame in self._frames():
-            for key, value in frame.iteritems():
+            for key, value in six.iteritems(frame):
                 if key not in seen:
                     seen.add(key)
                     if value is not Deleted:
                         yield (key, value)
+    if six.PY3:
+        items = iteritems
+        del iteritems
 
     def _frames(self):
         for cls in self.base.__mro__:
@@ -195,15 +217,20 @@ class _InstanceLookup(DictLike):
 
     def iteritems(self):
         seen = set()
-        for key, value in self.local.iteritems():
+        for key, value in six.iteritems(self.local):
             seen.add(key)
             if value is not Deleted:
                 yield key, value
-        for key, value in self.class_lookup.iteritems():
+        for key, value in six.iteritems(self.class_lookup):
             if key not in seen:
                 seen.add(key)
                 if value is not Deleted:  # pragma: nocover  (coverage bug)
                     yield key, value
+
+    if six.PY3:
+        items = iteritems
+        del iteritems
+
 
 
 class Properties(object):

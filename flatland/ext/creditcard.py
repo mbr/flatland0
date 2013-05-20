@@ -8,6 +8,7 @@ from flatland.validation import (
     Present,
     Validator,
 )
+import six
 
 VISA = 'Visa',
 MASTERCARD = 'MasterCard',
@@ -31,8 +32,8 @@ class CreditCardNumber(Long):
     def adapt(self, value):
         if value is None:
             return None
-        elif isinstance(value, (int, long)):
-            return long(value)
+        elif isinstance(value, six.integer_types):
+            return value
 
         value = _from_string(value)
 
@@ -44,10 +45,8 @@ class CreditCardNumber(Long):
     def serialize(self, value):
         if value is None:
             return u''
-        elif isinstance(value, long):
+        elif isinstance(value, six.integer_types):
             return _pretty_print(value)
-        else:
-            return unicode(value)
 
     Present = Present
 
@@ -83,7 +82,7 @@ _re_amex = re.compile(r'^3[47]\d{13}$')
 _re_disc = re.compile(r'^6011\d{12}$')
 
 def _card_type(number):
-    assert isinstance(number, (int, long))
+    assert isinstance(number, six.integer_types)
 
     as_str = str(number)
 
@@ -104,21 +103,21 @@ _re_filler = re.compile(r'^[0-9\s-]{15,}$')
 def _from_string(number):
     if number is None:
         return None
-    elif isinstance(number, (int, long)):
-        return long(number)
-    elif not isinstance(number, basestring):
+    elif isinstance(number, six.integer_types):
+        return number
+    elif not isinstance(number, six.string_types):
         return None
 
     if not _re_filler.match(number):
         return None
 
-    return long(_re_strip.sub(u'', unicode(number)))
+    return int(_re_strip.sub(u'', six.text_type(number)))
 
 def _pretty_print(number):
     if number is None:
         return u''
 
-    s = unicode(number)
+    s = six.text_type(number)
 
     if len(s) == 16:
         return u'%s-%s-%s-%s' % (s[0:4], s[4:8], s[8:12], s[12:16])

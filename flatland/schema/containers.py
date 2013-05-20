@@ -7,13 +7,15 @@ from flatland.util import (
     assignable_class_property,
     autodocument_from_superclasses,
     class_cloner,
+    decode_repr,
     keyslice_pairs,
     re_uescape,
     to_pairs,
     )
 from .base import Element, Unevaluated, Slot, validate_element
 from .scalars import Scalar
-
+import six
+from six.moves import xrange
 
 __all__ = (
     'Array',
@@ -61,7 +63,7 @@ class Container(Element):
         """
         for validator in validators:
             # metaclass gymnastics can fool this assertion. don't do that.
-            if isinstance(validator, type):
+            if isinstance(validator, six.class_types):
                 raise TypeError(
                     "Validator %r is a type, not a callable or instance of a"
                     "validator class.  Did you mean %r()?" % (
@@ -392,7 +394,7 @@ class Sequence(Container, list):
     def u(self):
         return u'[%s]' % u', '.join(
             element.u if isinstance(element, Container)
-                      else repr(element.u).decode('raw_unicode_escape')
+                      else decode_repr(element.u)
             for element in self.children)
 
 
@@ -463,7 +465,7 @@ class List(Sequence):
 
     def _new_slot(self, value=Unspecified):
         """Wrap *value* in a Slot named as the element's index in the list."""
-        return self.slot_type(name=str(len(self)).decode('ascii'),
+        return self.slot_type(name=six.text_type(len(self)),
                               parent=self,
                               element=self._as_element(value))
 
@@ -527,7 +529,8 @@ class List(Sequence):
         self._renumber()
 
     def sort(self, cmp=None, key=None, reverse=False):
-        list.sort(self, cmp, key, reverse)
+        assert cmp is None  # no cmp for list.sort in py3
+        list.sort(self, key=key, reverse=reverse)
         self._renumber()
 
     def reverse(self):
@@ -536,7 +539,7 @@ class List(Sequence):
 
     def _renumber(self):
         for idx, slot in enumerate(self._slots):
-            slot.name = str(idx).decode('ascii')
+            slot.name = six.text_type(str(idx))
 
     @property
     def children(self):
@@ -549,10 +552,10 @@ class List(Sequence):
             return
 
         if self.name:
-            regex = re.compile(ur'^%s(\d+)(?:%s|$)' % (
+            regex = re.compile(u'^%s(\\d+)(?:%s|$)' % (
                 re_uescape(self.name + sep), re_uescape(sep)), re.UNICODE)
         else:
-            regex = re.compile(ur'^(\d+)(?:%s|$)' % (
+            regex = re.compile(u'^(\\d+)(?:%s|$)' % (
                 re_uescape(sep)), re.UNICODE)
 
         indexes = defaultdict(list)
@@ -565,7 +568,7 @@ class List(Sequence):
             if not m:
                 continue
             try:
-                index = long(m.group(1))
+                index = int(m.group(1))
             except TypeError:
                 # Ignore keys with outrageously large indexes- they
                 # aren't valid data for us.
@@ -663,7 +666,7 @@ class Array(Sequence):
                 member = self.member_schema.from_flat([(key, value)])
                 self.append(member)
         else:
-            regex = re.compile(ur'^(%s(?:%s|$))' % (
+            regex = re.compile(u'^(%s(?:%s|$))' % (
                 re_uescape(self.name), re_uescape(sep)), re.UNICODE)
             for key, value in pairs:
                 m = regex.match(key)
@@ -725,11 +728,11 @@ class MultiValue(Array, Scalar):
     value = property(value, _set_value)
     del _set_value
 
-    def __nonzero__(self):
+    def __bool__(self):
         # this is a little troubling, given that it may not match the
         # appearance of the element in a scalar context.
-        return len(self)
-
+        return bool(len(self))
+    __nonzero__ = __bool__
 
 class Mapping(Container, dict):
     """Base of mapping-like Containers."""
@@ -788,7 +791,7 @@ class Mapping(Container, dict):
         elif dictish:
             for key, value in to_pairs(dictish[0]):
                 self[key] = value
-        for key, value in kwargs.iteritems():
+        for key, value in six.iteritems(kwargs):
             self[key] = value
 
     def setdefault(self, key, default=None):
@@ -806,7 +809,7 @@ class Mapping(Container, dict):
     @property
     def children(self):
         # order not guaranteed
-        return self.itervalues()
+        return six.itervalues(self)
 
     def set(self, value):
         """TODO: doc set()"""
@@ -823,7 +826,7 @@ class Mapping(Container, dict):
                         type(self).__name__, self.name, key))
             converted &= self[key].set(value)
             seen.add(key)
-        required = set(self.iterkeys())
+        required = set(six.iterkeys(self))
         if seen != required:
             missing = required - seen
             raise TypeError(
@@ -877,16 +880,16 @@ class Mapping(Container, dict):
     def u(self):
         """A string repr of the element."""
         pairs = ((key, value.u if isinstance(value, Container)
-                               else repr(value.u).decode('raw_unicode_escape'))
-                  for key, value in self.iteritems())
+                               else decode_repr(value.u))
+                  for key, value in six.iteritems(self))
         return u'{%s}' % u', '.join(
-            u"%s: %s" % (repr(k).decode('raw_unicode_escape'), v)
+            u"%s: %s" % (decode_repr(k), v)
             for k, v in pairs)
 
     @property
     def value(self):
         """The element as a regular Python dictionary."""
-        return dict((key, value.value) for key, value in self.iteritems())
+        return dict((key, value.value) for key, value in six.iteritems(self))
 
     @property
     def is_empty(self):
@@ -1001,7 +1004,7 @@ class Dict(Mapping, dict):
             seen.add(key)
 
         if policy == 'strict':
-            required = set(fields.iterkeys())
+            required = set(six.iterkeys(fields))
             if seen != required:
                 missing = required - seen
                 raise TypeError(
@@ -1067,7 +1070,7 @@ class Dict(Mapping, dict):
           >>> new_user = User(**user_keywords)
 
         """
-        fields = set(self.iterkeys())
+        fields = set(six.iterkeys(self))
         attributes = fields.copy()
         if rename:
             rename = list(to_pairs(rename))
@@ -1100,14 +1103,14 @@ class Dict(Mapping, dict):
 
         """
         data = self.slice(include=include, omit=omit, rename=rename, key=key)
-        for attribute, value in data.iteritems():
+        for attribute, value in six.iteritems(data):
             setattr(obj, attribute, value)
 
     def slice(self, include=None, omit=None, rename=None, key=None):
         """Return a ``dict`` containing a subset of the element's values."""
         return dict(
             keyslice_pairs(
-                ((key, element.value) for key, element in self.iteritems()),
+                ((key, element.value) for key, element in six.iteritems(self)),
                 include=include, omit=omit, rename=rename, key=key))
 
 
@@ -1216,7 +1219,7 @@ class SparseDict(Dict):
 
     @property
     def is_empty(self):
-        for _ in self.iterkeys():
+        for _ in six.iterkeys(self):
             return False
         return True
 

@@ -1,6 +1,7 @@
 import re
 from flatland.util import re_ucompile
-from base import N_, Validator
+from .base import N_, Validator
+import six
 
 
 class NANPphone(Validator):
@@ -9,7 +10,7 @@ class NANPphone(Validator):
     noext = N_(u'%(label)s must be a ten-digit phone number '
                u'without extension.')
 
-    re_cleaner = re_ucompile(ur'\D')
+    re_cleaner = re_ucompile(u'\\D')
     re_lowbit = re.compile('^[0-9]+$')
     fmt_line = u'(%03i) %03i-%04i'
     fmt_ext = fmt_line + ' x%i'
@@ -27,7 +28,7 @@ class NANPphone(Validator):
 
         if not self.re_lowbit.match(value):
             # Translate to single-byte numbers.
-            value = unicode(str(long(value)))
+            value = six.text_type(str(int(value)))
 
         if len(value) < 10:
             return self.note_error(element, state, 'invalid')

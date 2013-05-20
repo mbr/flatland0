@@ -2,6 +2,7 @@ from flatland import String
 from flatland.schema.properties import Properties
 
 from nose.tools import assert_raises
+import six
 
 
 def test_empty():
@@ -42,10 +43,10 @@ def test_dictlike():
     assert sorted(props.items()) == [('abc', 123), ('def', 456)]
 
     assert sorted(props.keys()) == ['abc', 'def']
-    assert sorted(props.iterkeys()) == ['abc', 'def']
+    assert sorted(six.iterkeys(props)) == ['abc', 'def']
 
     assert sorted(props.values()) == [123, 456]
-    assert sorted(props.itervalues()) == [123, 456]
+    assert sorted(six.itervalues(props)) == [123, 456]
 
     assert props.get('abc') == 123
     assert props.get('abc', 'blah') == 123
@@ -273,14 +274,16 @@ def test_perverse():
     assert Broken.properties == 'something else'
 
 
-def test_perverse_slots():
+# python3 immediately raises an exception if there is such a name clash
+if not six.PY3:
+    def test_perverse_slots():
 
-    class Base(object):
-        __slots__ = 'properties',
-        properties = Properties()
+        class Base(object):
+            __slots__ = 'properties',
+            properties = Properties()
 
-    b = Base()
-    assert_raises(AttributeError, lambda: b.properties['abc'])
+        b = Base()
+        assert_raises(AttributeError, lambda: b.properties['abc'])
 
 
 def test_dsl():

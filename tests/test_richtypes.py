@@ -1,3 +1,4 @@
+import six
 from flatland import Form, String
 from flatland.ext.creditcard import CreditCardNumber, VISA, MASTERCARD
 
@@ -32,7 +33,7 @@ def test_simple():
 
     data = Schema({'num': '4100000000000001'})
     assert data.validate()
-    assert isinstance(data['num'].value, long)
+    assert isinstance(data['num'].value, six.integer_types)
     assert data['num'].u == '4100-0000-0000-0001'
 
 

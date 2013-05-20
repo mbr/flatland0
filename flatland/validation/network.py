@@ -1,9 +1,15 @@
 # -*- coding: utf-8; fill-column: 78 -*-
 """Network address and URL validation."""
 import re
-import urlparse
 
-from base import N_, Validator
+import six
+
+if not six.PY3:
+    import urlparse
+else:
+    from urllib import parse as urlparse
+
+from .base import N_, Validator
 
 
 class IsEmail(Validator):
@@ -25,7 +31,7 @@ class IsEmail(Validator):
 
     **Attributes**
 
-    .. attribute:: nonlocal
+    .. attribute:: non_local
 
       Default ``True``.  When true, require at minimum two domain name
       components and reject local email addresses such as
@@ -57,11 +63,11 @@ class IsEmail(Validator):
 
     invalid = N_(u'%(label)s is not a valid email address.')
 
-    nonlocal = True
+    non_local = True
 
     local_part_pattern = None
 
-    domain_pattern = re.compile(r'^(?:[a-z0-9\-]+\.)*[a-z0-9\-]+$',
+    domain_pattern = re.compile('^(?:[a-z0-9\\-]+\\.)*[a-z0-9\\-]+$',
                                 re.IGNORECASE)
 
     def validate(self, element, state):
@@ -80,7 +86,7 @@ class IsEmail(Validator):
 
         try:
             # convert domain to ascii
-            domain = domain.encode('idna')
+            domain = domain.encode('idna').decode('ascii')
         except UnicodeError:
             return self.note_error(element, state, 'invalid')
 
@@ -91,7 +97,7 @@ class IsEmail(Validator):
             return self.note_error(element, state, 'invalid')
 
         labels = domain.split('.')
-        if len(labels) == 1 and self.nonlocal:
+        if len(labels) == 1 and self.non_local:
             return self.note_error(element, state, 'invalid')
 
         if not all(len(label) < 64 for label in labels):

@@ -12,6 +12,7 @@ from flatland.util import (
     named_int_factory,
     symbol,
     )
+import six
 
 
 __all__ = 'Element'
@@ -159,8 +160,8 @@ class Element(_BaseElement):
         :returns: a new class
 
         """
-        if not isinstance(name, (unicode, NoneType)):
-            name = unicode(name)
+        if not isinstance(name, (six.text_type, NoneType)):
+            name = six.text_type(name)
         cls.name = name
         return cls
 
@@ -181,7 +182,7 @@ class Element(_BaseElement):
             if not isinstance(overrides['properties'], Properties):
                 overrides['properties'] = Properties(overrides['properties'])
 
-        for attribute, value in overrides.iteritems():
+        for attribute, value in six.iteritems(overrides):
             # TODO: must make better
             if callable(value):
                 value = staticmethod(value)
@@ -206,7 +207,7 @@ class Element(_BaseElement):
         # TODO: See TODO in __init__
         for validator in validators:
             # metaclass gymnastics can fool this assertion. don't do that.
-            if isinstance(validator, type):
+            if isinstance(validator, six.class_types):
                 raise TypeError(
                     "Validator %r is a type, not a callable or instance of a"
                     "validator class.  Did you mean %r()?" % (
@@ -594,7 +595,7 @@ class Element(_BaseElement):
 
     @classmethod
     def _parse_element_path(self, path, sep):
-        if isinstance(path, basestring):
+        if isinstance(path, six.string_types):
             if path == sep:
                 return [Root]
             elif path.startswith(sep):

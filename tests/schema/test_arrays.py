@@ -1,3 +1,5 @@
+import six
+
 from flatland import (
     Array,
     Dict,
@@ -158,7 +160,7 @@ def test_mutation():
     el.pop()
     eq_(el.value, [u'f'])
     eq_(el[0].u, u'f')
-    eq_(el.u.encode('ascii'), repr([u'f']))
+    eq_(el.u, u"[u'f']")
 
     del el[:]
     eq_(list(el), [])

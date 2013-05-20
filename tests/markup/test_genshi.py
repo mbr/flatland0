@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from flatland import String
 from flatland.out.generic import Markup
 
@@ -186,7 +188,7 @@ def test_tortured_select():
     factory = schema.using(default=u'hit').from_defaults
     rendered = render(markup, 'xhtml', factory)
     if rendered != expected:
-        print "\n" + __name__
-        print "Expected:\n" + expected
-        print "Got:\n" + rendered
+        print("\n" + __name__)
+        print("Expected:\n" + expected)
+        print("Got:\n" + rendered)
     assert rendered == expected

@@ -2,11 +2,23 @@
 import re
 import string
 import sys
+import six
 
 try:
     import threading
 except ImportError:                                           # pragma:nocover
     import dummy_threading as threading
+
+
+def decode_repr(x):
+    """create a unicode string representation (as a unicode string)
+       for py2 and py3 that looks the same: u'example'
+    """
+    r = repr(x)
+    if six.PY3:
+        return 'u' + r
+    else:
+        return r.decode('raw_unicode_escape')
 
 
 # derived from ASPN Cookbook (#36302)
@@ -26,7 +38,7 @@ class lazy_property(object):
         if obj is None:
             return self
         value = self._deferred(obj)
-        setattr(obj, self._deferred.func_name, value)
+        setattr(obj, self._deferred.__name__, value)
         return value
 
 
@@ -163,18 +175,11 @@ class as_mapping(object):
 
     def __getitem__(self, item):
         try:
-            if isinstance(item, unicode):
-                return getattr(self.target, item.encode('ascii'))
             return getattr(self.target, item)
-        except (AttributeError, UnicodeError):
+        except AttributeError:
             raise KeyError(item)
 
     def __contains__(self, item):
-        if isinstance(item, unicode):
-            try:
-                return hasattr(self.target, item.encode('ascii'))
-            except UnicodeError:
-                return False
         return hasattr(self.target, item)
 
     def __iter__(self):
@@ -196,7 +201,9 @@ def re_ucompile(pattern, flags=0):
     return re.compile(pattern, flags | re.UNICODE)
 
 
-_alphanum = set((string.digits + string.letters).decode('ascii'))
+_alphanum = set(six.text_type(string.digits +
+                              string.ascii_lowercase +
+                              string.ascii_uppercase))
 
 
 def re_uescape(pattern):
@@ -233,11 +240,11 @@ def to_pairs(dictlike):
 
     """
     if hasattr(dictlike, 'iteritems'):
-        return dictlike.iteritems()
+        return six.iteritems(dictlike)
     elif hasattr(dictlike, 'keys'):
         return ((key, dictlike[key]) for key in dictlike.keys())
     elif hasattr(dictlike, '_asdict'): # namedtuple interface
-        return dictlike._asdict().iteritems()
+        return six.iteritems(dictlike._asdict())
     else:
         return ((key, value) for key, value in dictlike)
 
@@ -336,8 +343,9 @@ class Maybe(object):
         else:
             raise TypeError(type(other).__name__)
 
-    def __nonzero__(self):
+    def __bool__(self):
         raise NotImplementedError()
+    __nonzero__ = __bool__
 
     def __str__(self):
         return 'Maybe'

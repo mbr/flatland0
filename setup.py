@@ -1,10 +1,6 @@
 import os
 import sys
 
-if sys.version_info < (2, 5):
-    print "Python 2.5 or higher is required."
-    sys.exit(1)
-
 try:
     from setuptools import setup, find_packages
     extra_setup = dict(

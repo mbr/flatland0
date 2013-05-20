@@ -13,6 +13,7 @@ from flatland.util import (
     lazy_property,
     )
 from .base import Element
+import six
 
 
 __all__ = (
@@ -75,13 +76,13 @@ class Scalar(Element):
             self.value = None
             if value is None:
                 self.u = u''
-            elif isinstance(value, unicode):
+            elif isinstance(value, six.text_type):
                 self.u = value
             else:
                 try:
-                    self.u = unicode(value)
+                    self.u = six.text_type(value)
                 except UnicodeDecodeError:
-                    self.u = unicode(value, errors='replace')
+                    self.u = six.text_type(value, errors='replace')
             return False
 
         # stringify it, possibly storing what we received verbatim or a
@@ -114,7 +115,7 @@ class Scalar(Element):
         implementation returns ``unicode(value)``.
 
         """
-        return unicode(value)
+        return six.text_type(value)
 
     def _index(self, name):
         raise IndexError(name)
@@ -130,8 +131,13 @@ class Scalar(Element):
         if default is not Unspecified:
             self.set(default)
 
-    def __nonzero__(self):
+    def __bool__(self):
         return True if self.u and self.value else False
+    __nonzero__ = __bool__
+
+    def __str__(self):
+        s = self.__unicode__()
+        return s if six.PY3 else s.encode('utf-8')
 
     def __unicode__(self):
         return self.u
@@ -175,9 +181,9 @@ class String(Scalar):
         if value is None:
             return None
         elif self.strip:
-            return unicode(value).strip()
+            return six.text_type(value).strip()
         else:
-            return unicode(value)
+            return six.text_type(value)
 
     def serialize(self, value):
         """Return a Unicode representation.
@@ -188,12 +194,20 @@ class String(Scalar):
         removed.
 
         """
+        class text(six.text_type):
+            """same as base class, but repr has "u" prefix for py3"""
+            def __repr__(self):
+                r = six.text_type.__repr__(self)
+                if not r.startswith('u'):
+                    r = 'u' + r
+                return r
+
         if value is None:
-            return u''
+            return text(u'')
         elif self.strip:
-            return unicode(value).strip()
+            return text(value).strip()
         else:
-            return unicode(value)
+            return text(value)
 
     @property
     def is_empty(self):
@@ -228,7 +242,7 @@ class Number(Scalar):
         """
         if value is None:
             return None
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             value = value.strip()  # decimal.Decimal doesn't like whitespace
         try:
             native = self.type_(value)
@@ -253,7 +267,7 @@ class Number(Scalar):
         """
         if type(value) is self.type_:
             return self.format % value
-        return unicode(value)
+        return six.text_type(value)
 
 
 class Integer(Number):
@@ -269,11 +283,12 @@ class Integer(Number):
 class Long(Number):
     """Element type for Python's long."""
 
-    type_ = long
+    type_ = int
     """``long``"""
 
     format = u'%i'
     """``u'%i'``"""
+
 
 class Float(Number):
     """Element type for Python's float."""
@@ -328,7 +343,7 @@ class Boolean(Scalar):
         For non-string values, equivalent to ``bool(value)``.
 
         """
-        if not isinstance(value, basestring):
+        if not isinstance(value, six.string_types):
             return bool(value)
         elif value == self.true or value in self.true_synonyms:
             return True
@@ -469,7 +484,7 @@ class Temporal(Scalar):
             return value
         elif isinstance(value, self.type_):
             return value
-        elif isinstance(value, basestring):
+        elif isinstance(value, six.string_types):
             if self.strip:
                 value = value.strip()
             match = self.regex.match(value)
@@ -493,7 +508,7 @@ class Temporal(Scalar):
         if isinstance(value, self.type_):
             return self.format % as_mapping(value)
         else:
-            return unicode(value)
+            return six.text_type(value)
 
 
 class DateTime(Temporal):
@@ -505,8 +520,8 @@ class DateTime(Temporal):
 
     type_ = datetime.datetime
     regex = re.compile(
-        ur'^(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2}) '
-        ur'(?P<hour>\d{2}):(?P<minute>\d{2}):(?P<second>\d{2})$')
+        u'^(?P<year>\\d{4})-(?P<month>\\d{2})-(?P<day>\\d{2}) '
+        u'(?P<hour>\\d{2}):(?P<minute>\\d{2}):(?P<second>\\d{2})$')
     format = (u'%(year)04i-%(month)02i-%(day)02i '
               u'%(hour)02i:%(minute)02i:%(second)02i')
     used = (u'year', u'month', u'day', u'hour', u'minute', u'second')
@@ -521,7 +536,7 @@ class Date(Temporal):
 
     type_ = datetime.date
     regex = re.compile(
-        ur'^(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})$')
+        u'^(?P<year>\\d{4})-(?P<month>\\d{2})-(?P<day>\\d{2})$')
     format = u'%(year)04i-%(month)02i-%(day)02i'
     used = (u'year', u'month', u'day')
 
@@ -535,7 +550,7 @@ class Time(Temporal):
 
     type_ = datetime.time
     regex = re.compile(
-        ur'^(?P<hour>\d{2}):(?P<minute>\d{2}):(?P<second>\d{2})$')
+        u'^(?P<hour>\\d{2}):(?P<minute>\\d{2}):(?P<second>\\d{2})$')
     format = u'%(hour)02i:%(minute)02i:%(second)02i'
     used = (u'hour', u'minute', u'second')
 

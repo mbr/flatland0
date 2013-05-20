@@ -2,6 +2,7 @@
 from operator import attrgetter
 
 from flatland.schema.util import find_i18n_function
+import six
 
 
 N_ = lambda translatable: translatable
@@ -20,7 +21,7 @@ class Validator(object):
 
         """
         cls = type(self)
-        for attr, value in kw.iteritems():
+        for attr, value in six.iteritems(kw):
             if hasattr(cls, attr):
                 setattr(self, attr, value)
             else:

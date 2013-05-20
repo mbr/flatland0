@@ -1,3 +1,4 @@
+import six
 import datetime
 import decimal
 
@@ -70,20 +71,20 @@ def test_string():
         for element in String(), String(strip=True):
             element.set(value)
             eq_(element.u, expected)
-            eq_(unicode(element), expected)
+            eq_(six.text_type(element), expected)
             eq_(element.value, expected)
 
     for value, expected in ((u'abc ', u'abc '), (' abc ', u' abc ')):
         element = String(value, strip=False)
         eq_(element.u, expected)
-        eq_(unicode(element), expected)
+        eq_(six.text_type(element), expected)
         eq_(element.value, expected)
 
     for value, expected_value, expected_unicode in ((u'', u'', u''),
                                                     (None, None, u'')):
         element = String(value)
         eq_(element.u, expected_unicode)
-        eq_(unicode(element), expected_unicode)
+        eq_(six.text_type(element), expected_unicode)
         eq_(element.value, expected_value)
 
 
@@ -103,8 +104,8 @@ def validate_element_set(type_, raw, value, uni, schema_opts={},
     eq_(element.set(raw), set_return)
     eq_(element.value, value)
     eq_(element.u, uni)
-    eq_(unicode(element), uni)
-    eq_(element.__nonzero__(), bool(uni and value))
+    eq_(six.text_type(element), uni)
+    eq_(element.__bool__(), bool(uni and value))
 
 
 coerced_validate_element_set = requires_unicode_coercion(validate_element_set)
@@ -119,7 +120,7 @@ def test_scalar_set():
 
     for spec in (
         ([],         None, u'[]'),
-        ('\xef\xf0', None, ur'\ufffd\ufffd'),
+        ('\xef\xf0', None, u'\ufffd\ufffd'),  # TODO: adapt this for python 3.3
         ):
         yield (coerced_validate_element_set, Integer) + spec
 
@@ -146,17 +147,18 @@ def test_integer():
 
 
 def test_long():
-    for spec in ((u'123',    123L,  u'123'),
-                 (u' 123 ',  123L,  u'123'),
-                 (u'xyz',    None,  u'xyz'),
-                 (u'xyz123', None,  u'xyz123'),
-                 (u'123xyz', None,  u'123xyz'),
-                 (u'123.0',  None,  u'123.0'),
-                 (u'+123',   123L,  u'123'),
-                 (u'-123',   -123L, u'-123'),
-                 (u' +123 ', 123L,  u'123'),
-                 (u' -123 ', -123L, u'-123'),
-                 (u'+123',   123L,  u'123', dict(signed=False)),
+    long_type = int if six.PY3 else long
+    for spec in ((u'123',    long_type(123),  u'123'),
+                 (u' 123 ',  long_type(123),  u'123'),
+                 (u'xyz',    None,            u'xyz'),
+                 (u'xyz123', None,            u'xyz123'),
+                 (u'123xyz', None,            u'123xyz'),
+                 (u'123.0',  None,            u'123.0'),
+                 (u'+123',   long_type(123),  u'123'),
+                 (u'-123',   long_type(-123), u'-123'),
+                 (u' +123 ', long_type(123),  u'123'),
+                 (u' -123 ', long_type(-123), u'-123'),
+                 (u'+123',   long_type(123),  u'123', dict(signed=False)),
                  (u'-123',   None,  u'-123', dict(signed=False)),
                  (None,      None,  u'', {}, True)):
         yield (validate_element_set, Long) + spec

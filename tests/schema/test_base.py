@@ -1,3 +1,6 @@
+import six
+from six.moves import xrange
+
 from flatland import (
     Element,
     Skip,
@@ -193,8 +196,9 @@ def test_validator_return():
         def __init__(self, val):
             self.val = val
 
-        def __nonzero__(self):
+        def __bool__(self):
             return bool(self.val)
+        __nonzero__ = __bool__
 
     Validatable = Element.using(validates_down='validators')
 

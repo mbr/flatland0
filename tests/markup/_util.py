@@ -1,3 +1,6 @@
+from __future__ import print_function
+
+import six
 from functools import wraps
 
 from nose import SkipTest
@@ -84,9 +87,9 @@ class desired_output(object):
                                      **self.render_context)
                 expected = self.expectation_for('genshi')
                 if expected != got:
-                    print "\n" + fn.__name__
-                    print "Expected:\n" + expected
-                    print "Got:\n" + got
+                    print("\n" + fn.__name__)
+                    print("Expected:\n" + expected)
+                    print("Got:\n" + got)
                 assert expected == got
             return runner
         return decorator
@@ -100,9 +103,9 @@ class desired_output(object):
                                         **self.render_context)
                 expected = self.expectation_for('markup')
                 if expected != got:
-                    print "\n" + fn.__name__
-                    print "Expected:\n" + expected
-                    print "Got:\n" + got
+                    print("\n" + fn.__name__)
+                    print("Expected:\n" + expected)
+                    print("Got:\n" + got)
                 assert expected == got
             return runner
         return decorator
@@ -117,7 +120,8 @@ def markup_test(markup='xml', schema=None):
 
     """
     def decorator(fn):
-        expected = fn.__doc__.decode('utf8').strip()
+        decode = lambda x: x if six.PY3 else x.decode('utf-8')
+        expected = decode(fn.__doc__).strip()
 
         @wraps(fn)
         def test():
@@ -133,9 +137,9 @@ def markup_test(markup='xml', schema=None):
 
             got = got.strip()
             if expected != got:
-                print "\n" + fn.__name__
-                print "Expected:\n" + expected
-                print "Got:\n" + got
+                print("\n" + fn.__name__)
+                print("Expected:\n" + expected)
+                print("Got:\n" + got)
             assert expected == got
         return test
     return decorator

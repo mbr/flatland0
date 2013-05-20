@@ -15,6 +15,7 @@ deferred_module.shadow(
             'autodocument_from_superclasses',
             'class_cloner',
             'decorator',
+            'decode_repr',
             'format_argspec_plus',
             'keyslice_pairs',
             'lazy_property',

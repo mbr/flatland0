@@ -100,14 +100,14 @@ def test_builtin_gettext():
 
     try:
         # translators can go into the builtins
-        import __builtin__
-        __builtin__.ugettext = catalog.ugettext
-        __builtin__.ungettext = catalog.ungettext
+        from six.moves import builtins
+        builtins.ugettext = catalog.ugettext
+        builtins.ungettext = catalog.ungettext
         data.validate()
         assert data['age'].errors == [u'reg AGE']
     finally:
-        del __builtin__.ugettext
-        del __builtin__.ungettext
+        del builtins.ugettext
+        del builtins.ungettext
 
 
 def test_state_gettext():

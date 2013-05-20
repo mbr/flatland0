@@ -1,3 +1,5 @@
+import six
+
 from functools import update_wrapper
 import operator
 
@@ -5,6 +7,7 @@ from flatland.exc import AdaptationError
 from flatland.util import Unspecified, threading
 from .containers import Array, Mapping
 from .scalars import Date, Integer, Scalar, String
+from functools import reduce
 
 
 class _MetaCompound(type):
@@ -25,7 +28,7 @@ class _MetaCompound(type):
         # Find **kw that would override existing class properties and
         # remove them from kw.
         overrides = {}
-        for key in kw.keys():
+        for key in list(kw.keys()):
             if hasattr(cls, key):
                 overrides[key] = kw.pop(key)
 
@@ -59,7 +62,7 @@ class _MetaCompound(type):
 def _wrap_compound_init(fn):
     """Decorate __compound_init__ with a status setter & classmethod."""
     if isinstance(fn, classmethod):
-        fn = fn.__get__(str).im_func  # type doesn't matter here
+        fn = fn.__get__(str).__func__  # type doesn't matter here
     def __compound_init__(cls):
         res = fn(cls)
         cls._compound_prepared = True
@@ -67,8 +70,10 @@ def _wrap_compound_init(fn):
     update_wrapper(__compound_init__, fn)
     return classmethod(__compound_init__)
 
+class _CompoundBase(Mapping, Scalar):
+    """six can only handle 1 base class"""
 
-class Compound(Mapping, Scalar):
+class Compound(six.with_metaclass(_MetaCompound, _CompoundBase)):
     """A mapping container that acts like a scalar value.
 
     Compound fields are dictionary-like fields that can assemble a
@@ -178,7 +183,7 @@ class Compound(Mapping, Scalar):
     def __repr__(self):
         try:
             return Scalar.__repr__(self)
-        except Exception, exc:
+        except Exception as exc:
             return '<%s %r; value raised %s>' % (
                 type(self).__name__, self.name, type(exc).__name__)
 
@@ -233,7 +238,7 @@ class DateYYYYMMDD(Compound, Date):
 
             for attrib, child_schema in zip(self.used, self.field_schema):
                 self[child_schema.name].set(
-                    getattr(value, attrib.encode('ascii')))
+                    getattr(value, attrib))
         except (AdaptationError, TypeError):
             for child_schema in self.field_schema:
                 self[child_schema.name].set(None)
@@ -291,7 +296,7 @@ class JoinedString(Array, String):
     def set(self, value):
         if isinstance(value, (list, tuple)):
             values = value
-        elif not isinstance(value, basestring):
+        elif not isinstance(value, six.string_types):
             values = list(value)
         elif self.separator_regex:
             # a basestring, regexp separator

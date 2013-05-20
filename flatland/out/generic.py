@@ -3,6 +3,7 @@ import re
 from flatland.out.util import parse_trool
 from flatland.schema import Array, Boolean
 from flatland.util import Maybe, to_pairs
+import six
 
 
 __all__ = ('transform', 'Context')
@@ -64,14 +65,14 @@ class Context(object):
             source = to_pairs(iterable[0])
             for key, value in source:
                 self[key] = value
-        for key, value in kwargs.iteritems():
-            self[key.decode('ascii')] = value
+        for key, value in six.iteritems(kwargs):
+            self[key] = value
 
     def __repr__(self):
         return "%s(%r)" % (self.__class__.__name__, self._frames[-1])
 
 
-class Markup(unicode):
+class Markup(six.text_type):
     """A unicode string of HTML markup that should not be escaped in output."""
     __slots__ = ()
 
@@ -155,7 +156,7 @@ def transform_value(tagname, attributes, contents, context, bind):
         current = attributes.get(u'value')
         if current is not None:
             value = current
-        elif isinstance(contents, unicode):
+        elif isinstance(contents, six.text_type):
             value = contents.strip()
         elif contents is None:
             value = u''
@@ -224,7 +225,7 @@ def transform_tabindex(tagname, attributes, contents, context, bind):
 
     current = attributes.get(u'tabindex')
     if forced or current is None and tagname in _auto_tags[u'tabindex']:
-        attributes[u'tabindex'] = unicode(tabindex)
+        attributes[u'tabindex'] = six.text_type(tabindex)
         if tabindex > 0:
             context[u'tabindex'] = tabindex + 1
     return contents
@@ -303,9 +304,9 @@ def _sanitize_domid_suffix(string):
 def _unpack(html_string):
     """Extract HTML unicode from a __html__() interface."""
     unpacked = html_string.__html__()
-    if unpacked.__class__ is unicode:
+    if unpacked.__class__ is six.text_type:
         return unpacked
-    return unicode(unpacked)
+    return six.text_type(unpacked)
 
 
 def _markup_escape(string):

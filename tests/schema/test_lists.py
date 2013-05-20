@@ -1,3 +1,6 @@
+import six
+from six.moves import xrange
+
 from flatland import (
     Integer,
     List,
@@ -335,7 +338,7 @@ def test_mutation():
     def order_ok():
         slot_names = list(_.name for _ in el._slots)
         for idx, name in enumerate(slot_names):
-            assert name == str(idx).decode('ascii')
+            assert name == six.text_type(str(idx))
 
     assert not el
     order_ok()

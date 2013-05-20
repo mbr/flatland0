@@ -1,4 +1,5 @@
 from flatland.util import Maybe
+import six
 
 
 YES = (u'1', u'true', u'True', u't', u'on', u'yes')
@@ -9,10 +10,9 @@ MAYBE = (u'auto',)
 def parse_trool(value):
     if value is True or value is False or value is Maybe:
         return value
-    if isinstance(value, unicode):
-        value = value.lower()
-    else:
-        value = unicode(value).lower()
+    if not isinstance(value, six.text_type):
+        value = six.text_type(value)
+    value = value.lower()
     if value in YES:
         return True
     if value in NO:
