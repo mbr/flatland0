@@ -876,7 +876,7 @@ class Element(_BaseElement):
         global xml
         if xml is None:
             import xml.sax.saxutils
-        return xml.sax.saxutils.quoteattr(self.u)[1:-1]
+        return xml.sax.saxutils.quoteattr(u"'" + self.u)[2:-1]
 
     def __hash__(self):
         raise TypeError('%s object is unhashable', self.__class__.__name__)
