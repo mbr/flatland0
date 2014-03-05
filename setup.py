@@ -3,7 +3,7 @@ import sys
 
 from setuptools import setup, find_packages
 
-long_desc = open('README').read()
+long_desc = open('README.rst').read()
 
 setup(name="flatland0",
       version='0.0.1.dev1',
