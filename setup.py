@@ -42,6 +42,6 @@ setup(name="flatland",
                    'Topic :: Internet :: WWW/HTTP :: WSGI',
                    'Topic :: Software Development :: Libraries'],
       install_requires=[
-          'blinker',
+          'blinker', 'six',
           ],
       **extra_setup)
