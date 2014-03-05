@@ -1,6 +1,3 @@
-import os
-import sys
-
 from setuptools import setup, find_packages
 
 
@@ -18,5 +15,5 @@ setup(name="flatland0",
       zip_safe=True,
       install_requires=[
           'blinker', 'six',
-          ],
+      ],
       )
