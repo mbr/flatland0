@@ -3,12 +3,10 @@ import sys
 
 from setuptools import setup, find_packages
 
-import flatland
-version = flatland.__version__
 long_desc = open('README').read()
 
-setup(name="flatland",
-      version=version,
+setup(name="flatland0",
+      version='0.0.1.dev1',
       packages=find_packages(exclude=['tests.*', 'tests']),
       author='Jason Kirtland',
       author_email='jek@discorporate.us',
