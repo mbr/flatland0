@@ -1,6 +1,9 @@
 flatland
 ========
 
+.. image:: https://travis-ci.org/mbr/flatland0.png?branch=master
+   :target: https://travis-ci.org/mbr/flatland0
+
 Flatland maps between rich, structured Python application data and the
 string-oriented flat namespace of web forms, key/value stores, text
 files and user input.  Flatland provides a schema-driven mapping
