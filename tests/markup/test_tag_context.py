@@ -1,5 +1,7 @@
 from tests.markup._util import desired_output
 
+import pytest
+
 
 def simple_schema():
     from flatland import Form, String
@@ -13,6 +15,9 @@ def simple_schema():
     return SmallForm({u'valued': u'val'})
 
 ### value
+@pytest.fixture
+def gen():
+    pytest.skip('FIXME: Test not converted yet')
 
 
 @desired_output('xhtml', simple_schema)

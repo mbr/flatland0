@@ -2,10 +2,15 @@ from flatland import String
 
 from tests.markup._util import desired_output
 
+import pytest
 
 schema = String.named(u'element').using(default=u'val').from_defaults
 
+
 ### value
+@pytest.fixture
+def gen():
+    pytest.skip('FIXME: Test not converted yet')
 
 
 @desired_output('html', schema)

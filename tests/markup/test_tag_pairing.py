@@ -1,5 +1,12 @@
 from tests.markup._util import desired_output
 
+import pytest
+
+
+@pytest.fixture
+def gen():
+    pytest.skip('FIXME: Test not converted yet')
+
 
 def simple_schema():
     from flatland import Form, String

@@ -2,6 +2,13 @@ from flatland import Array, String
 
 from tests.markup._util import desired_output
 
+import pytest
+
+
+@pytest.fixture
+def gen():
+    pytest.skip('FIXME: Test not converted yet')
+
 
 def scalar_schema():
     schema = String.named(u'scalar')
