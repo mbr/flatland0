@@ -3,11 +3,10 @@ from __future__ import print_function
 import six
 from functools import wraps
 
-from nose import SkipTest
+import pytest
 
 
 class Capabilities(dict):
-
     def __missing__(self, capability):
         probe = getattr(self, '_' + capability)
         self[capability] = have = probe()
@@ -37,7 +36,7 @@ def need(capability):
         @wraps(fn)
         def decorated(*args, **kw):
             if not have[capability]:
-                raise SkipTest
+                pytest.skip()
             return fn(*args, **kw)
         return decorated
     return decorator
@@ -82,7 +81,7 @@ class desired_output(object):
             @wraps(fn)
             def runner():
                 if not have['genshi']:
-                    raise SkipTest
+                    raise pytest.skip()
                 got = _render_genshi(markup, self.language, self.schema,
                                      **self.render_context)
                 expected = self.expectation_for('genshi')

@@ -6,7 +6,7 @@ from flatland import (
     Integer,
     Form,
     List,
-    )
+)
 from flatland.schema.paths import (
     NAME,
     SLICE,
@@ -15,9 +15,9 @@ from flatland.schema.paths import (
     HERE,
     pathexpr,
     tokenize,
-    )
-from tests._util import assert_raises
+)
 
+import pytest
 
 def _tokenizes_as(path, expected):
     tokenized = tokenize(path)
@@ -158,7 +158,7 @@ def test_evaluation():
         (el, 'dt1', [today]),
         (el, 'dt1/year', [today.year]),
         (el, 'dt1/./year', [today.year]),
-        ]
+    ]
     for element, path, expected in _finders:
         yield _finds, element, path, expected
 
@@ -170,10 +170,11 @@ def test_find_strict_loose():
         (el, '/d1/d1i3'),
         (el, 'l1[5]'),
         (el, 'l3[:]/missing'),
-        ]
+    ]
 
     for element, path in _cases:
-        assert_raises(LookupError, element.find, path)
+        with pytest.raises(LookupError):
+            element.find(path)
 
         found = element.find(path, strict=False)
         assert not found
@@ -212,7 +213,7 @@ def test_find_default():
         (el, 'i1', [0]),
         (el, 'a1[:]', [10, 11, 12, 13, 14, 15]),
         (el, 'a1[0]', [10]),
-        ]
+    ]
 
     for element, path, expected in _cases:
         elements = element.find(path)
@@ -228,7 +229,7 @@ def test_find_single():
         (el, 'a1[0]', 10),
         (el, 'a1[10]', None),
         (el, 'l3[1:][1:]', 6),
-        ]
+    ]
 
     for element, path, expected in _cases:
         element = element.find(path, single=True, strict=False)

@@ -1,9 +1,7 @@
 from flatland import (
     Dict,
     String,
-    )
-
-from tests._util import eq_
+)
 
 
 def test_dict():
@@ -22,11 +20,11 @@ def test_string_element():
     el3 = String(default=u'')
     el3.set_default()
 
-    assert el1.value == None
+    assert el1.value is None
     assert el1.u == u''
     assert not el1
 
-    assert el2.value == None
+    assert el2.value is None
     assert el2.u == u''
     assert not el2
 
@@ -64,5 +62,5 @@ def test_path():
         Dict.named('dict').of(String.named('dict_element')))
     element = schema()
 
-    eq_(list(element.el(['dict', 'dict_element']).path),
-        [element, element['dict'], element['dict']['dict_element']])
+    assert (list(element.el(['dict', 'dict_element']).path) ==
+            [element, element['dict'], element['dict']['dict_element']])

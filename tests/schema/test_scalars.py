@@ -14,14 +14,17 @@ from flatland import (
     String,
     Time,
     Unset,
-    )
+)
 
-from tests._util import eq_, assert_raises, requires_unicode_coercion
+from tests._util import requires_unicode_coercion
+
+import pytest
 
 
 def test_scalar_abstract():
     el = Scalar()
-    assert_raises(NotImplementedError, el.set, 'blagga')
+    with pytest.raises(NotImplementedError):
+        el.set('blagga')
 
 
 def test_scalar_assignments_are_independent():
@@ -36,8 +39,9 @@ def test_scalar_assignments_are_independent():
     assert not element.u
     assert not element.value
     element.value = u'abc'
-    eq_(element.u, u'')
-    eq_(element.value, u'abc')
+
+    assert element.u == u''
+    assert element.value == u'abc'
 
 
 def test_scalar_set_flat():
@@ -56,12 +60,12 @@ def test_scalar_set_flat():
         element.set_flat(data)
         return element
 
-    eq_(element_for(u'a').value, u'1')
-    eq_(element_for(u'a').raw, u'1')
-    eq_(element_for(u'b').value, u'2')
-    eq_(element_for(u'b').raw, u'2')
-    eq_(element_for(u'c').value, None)
-    eq_(element_for(u'c').raw, Unset)
+    assert element_for(u'a').value == u'1'
+    assert element_for(u'a').raw == u'1'
+    assert element_for(u'b').value == u'2'
+    assert element_for(u'b').raw == u'2'
+    assert element_for(u'c').value is None
+    assert element_for(u'c').raw == Unset
 
 
 @requires_unicode_coercion
@@ -70,22 +74,22 @@ def test_string():
                             (u'abc ', u'abc'), (' abc ', u'abc')):
         for element in String(), String(strip=True):
             element.set(value)
-            eq_(element.u, expected)
-            eq_(six.text_type(element), expected)
-            eq_(element.value, expected)
+            assert element.u == expected
+            assert six.text_type(element) == expected
+            assert element.value == expected
 
     for value, expected in ((u'abc ', u'abc '), (' abc ', u' abc ')):
         element = String(value, strip=False)
-        eq_(element.u, expected)
-        eq_(six.text_type(element), expected)
-        eq_(element.value, expected)
+        assert element.u == expected
+        assert six.text_type(element) == expected
+        assert element.value == expected
 
     for value, expected_value, expected_unicode in ((u'', u'', u''),
                                                     (None, None, u'')):
         element = String(value)
-        eq_(element.u, expected_unicode)
-        eq_(six.text_type(element), expected_unicode)
-        eq_(element.value, expected_value)
+        assert element.u == expected_unicode
+        assert six.text_type(element) == expected_unicode
+        assert element.value == expected_value
 
 
 def test_string_is_empty():
@@ -101,11 +105,11 @@ def validate_element_set(type_, raw, value, uni, schema_opts={},
     if set_return is None:
         set_return = value is not None
     element = type_(**schema_opts)
-    eq_(element.set(raw), set_return)
-    eq_(element.value, value)
-    eq_(element.u, uni)
-    eq_(six.text_type(element), uni)
-    eq_(element.__bool__(), bool(uni and value))
+    assert element.set(raw) == set_return
+    assert element.value == value
+    assert element.u == uni
+    assert six.text_type(element) == uni
+    assert element.__bool__() == bool(uni and value)
 
 
 coerced_validate_element_set = requires_unicode_coercion(validate_element_set)
@@ -115,13 +119,13 @@ def test_scalar_set():
     # a variety of scalar set() failure cases, shoved through Integer
     for spec in (
         (None,       None, u'', {}, True),
-        ):
+    ):
         yield (validate_element_set, Integer) + spec
 
     for spec in (
         ([],         None, u'[]'),
         ('\xef\xf0', None, u'\ufffd\ufffd'),  # TODO: adapt this for python 3.3
-        ):
+    ):
         yield (coerced_validate_element_set, Integer) + spec
 
 

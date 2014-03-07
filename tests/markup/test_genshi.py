@@ -3,8 +3,9 @@ from __future__ import print_function
 from flatland import String
 from flatland.out.generic import Markup
 
-from tests._util import assert_raises
 from tests.markup._util import render_genshi as render, need
+
+import pytest
 
 
 TemplateSyntaxError = None
@@ -20,7 +21,8 @@ def setup():
 def test_version_sensor():
     from flatland.out import genshi
     template = 'not a Genshi 0.6+ template'
-    assert_raises(RuntimeError, genshi.setup, template)
+    with pytest.raises(RuntimeError):
+        genshi.setup(template)
 
 
 def test_bogus_tags():
@@ -30,16 +32,18 @@ def test_bogus_tags():
         u'<form:auto-domid/>',
         u'<form:auto-for/>',
         u'<form:auto-tabindex/>',
-        ]:
-        assert_raises(TemplateSyntaxError, render, snippet, 'xml', schema)
+    ]:
+        with pytest.raises(TemplateSyntaxError):
+            render(snippet, 'xml', schema)
 
 
 def test_bogus_elements():
     for snippet in [
         u'<div form:with="snacks" />',
         u'<div form:set="snacks" />',
-        ]:
-        assert_raises(TemplateSyntaxError, render, snippet, 'xml', schema)
+    ]:
+        with pytest.raises(TemplateSyntaxError):
+            render(snippet, 'xml', schema)
 
 
 def test_directive_ordering():

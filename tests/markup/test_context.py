@@ -1,5 +1,6 @@
 from flatland.out.generic import Context, _default_context
-from tests._util import assert_raises
+
+import pytest
 
 Nothing = object()
 
@@ -20,8 +21,10 @@ def test_read_write_unknown():
     needle = 'xyzzy'
     assert needle not in _default_context.keys()
     assert needle not in ctx
-    assert_raises(KeyError, lambda: ctx[needle])
-    assert_raises(KeyError, ctx.__setitem__, needle, Nothing)
+    with pytest.raises(KeyError):
+        ctx[needle]()
+    with pytest.raises(KeyError):
+        ctx.__setitem__(needle, Nothing)
 
 
 def test_push_known():
@@ -44,8 +47,11 @@ def test_push_unknown():
     needle = 'xyzzy'
     assert needle not in _default_context.keys()
 
-    assert_raises(KeyError, ctx.push, **{needle: Nothing})
-    assert_raises(RuntimeError, ctx.pop)
+    with pytest.raises(KeyError):
+
+        ctx.push(**{needle: Nothing})
+    with pytest.raises(RuntimeError):
+        ctx.pop()
 
 
 def test_update_known():
@@ -74,13 +80,16 @@ def test_update_unknown():
     ctx = Context()
     assert u'xyzzy' not in _default_context.keys()
 
-    assert_raises(KeyError, ctx.update, xyzzy=123)
+    with pytest.raises(KeyError):
+
+        ctx.update(xyzzy=123)
     assert u'xyzzy' not in ctx
 
 
 def test_update_bogus():
     ctx = Context()
-    assert_raises(TypeError, ctx.update, [], [])
+    with pytest.raises(TypeError):
+        ctx.update([], [])
 
 
 def test_minimum_repr_sanity():
@@ -91,7 +100,8 @@ def test_minimum_repr_sanity():
 
 def test_default_minimum_stack():
     ctx = Context()
-    assert_raises(RuntimeError, ctx.pop)
+    with pytest.raises(RuntimeError):
+        ctx.pop()
 
 
 def test_stack_plain_push_pop():
@@ -109,4 +119,6 @@ def test_stack_plain_push_pop():
     assert ctx[needle] is not Nothing
     assert ctx[needle] == initial_value
 
-    assert_raises(RuntimeError, ctx.pop)
+    with pytest.raises(RuntimeError):
+
+        ctx.pop()

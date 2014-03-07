@@ -7,7 +7,7 @@ from flatland import (
     Integer,
     List,
     String,
-    )
+)
 from flatland.validation import (
     IsFalse,
     IsTrue,
@@ -20,9 +20,7 @@ from flatland.validation import (
     ValueIn,
     ValueLessThan,
     ValuesEqual,
-    )
-
-from tests._util import eq_
+)
 
 
 def form(value):
@@ -138,14 +136,14 @@ def test_value_between():
 
 def test_map_equal():
     v = MapEqual('x', 'y',
-                         transform=lambda el: el.value.upper(),
-                         unequal='%(labels)s/%(last_label)s')
+                 transform=lambda el: el.value.upper(),
+                 unequal='%(labels)s/%(last_label)s')
     el = form(dict(x='a', y='A'))
     assert v.validate(el, None)
 
     el = form(dict(x='a', y='B'))
     assert not v.validate(el, None)
-    eq_(el.errors, ['x/y'])
+    assert el.errors == ['x/y']
 
 
 def test_values_equal_two():
@@ -155,11 +153,11 @@ def test_values_equal_two():
 
     el = form(dict(x='a', y='b', z='c'))
     assert not v.validate(el, None)
-    eq_(el.errors, ['x and y do not match.'])
+    assert el.errors == ['x and y do not match.']
 
     el = form(dict(x='a'))
     assert not v.validate(el, None)
-    eq_(el.errors, ['x and y do not match.'])
+    assert el.errors == ['x and y do not match.']
 
 
 def test_values_equal_three():
@@ -169,11 +167,11 @@ def test_values_equal_three():
 
     el = form(dict(x='a', y='b', z='c'))
     assert not v.validate(el, None)
-    eq_(el.errors, ['x, y and z do not match.'])
+    assert el.errors == ['x, y and z do not match.']
 
     el = form(dict(x='a'))
     assert not v.validate(el, None)
-    eq_(el.errors, ['x, y and z do not match.'])
+    assert el.errors == ['x, y and z do not match.']
 
 
 def test_values_equal_resolution():

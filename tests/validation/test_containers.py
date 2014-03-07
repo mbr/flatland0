@@ -12,7 +12,7 @@ from flatland.validation import (
     NotDuplicated,
     )
 
-from tests._util import assert_raises
+import pytest
 
 
 def valid_of_children(element):
@@ -21,7 +21,8 @@ def valid_of_children(element):
 
 def validated_string(*validators):
     return List.named('test').of(String.using(name=u'foo',
-                                             validators=validators))
+                                              validators=validators))
+
 
 def test_no_duplicates_message():
     schema = validated_string(NotDuplicated())
@@ -32,7 +33,9 @@ def test_no_duplicates_message():
 
 def test_no_duplicates_context():
     el = String(validators=[NotDuplicated()])
-    assert_raises(TypeError, el.validate)
+
+    with pytest.raises(TypeError):
+        el.validate()
 
 
 def test_no_duplicates_comparator():

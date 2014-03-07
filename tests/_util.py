@@ -5,11 +5,9 @@ from inspect import stack
 import sys
 import six
 
-from nose.tools import eq_, assert_raises, raises
 
-
-__all__ = ['asciistr', 'assert_raises', 'eq_', 'raises', 'fails',
-           'requires_unicode_coercion', 'udict', 'unicode_coercion_available']
+__all__ = ['asciistr', 'fails', 'requires_unicode_coercion', 'udict',
+           'unicode_coercion_available']
 
 # acts like 'str', but safe to use when tests are running with
 # sys.getdefaultencoding() == 'nocoercion'.

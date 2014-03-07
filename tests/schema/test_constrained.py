@@ -4,9 +4,7 @@ from flatland import (
     Constrained,
     Enum,
     Integer,
-    )
-
-from tests._util import eq_, assert_raises
+)
 
 
 def test_constrained_no_default_validity():
@@ -44,7 +42,7 @@ def test_constrained_instance_override():
 
     for invalid in u'3', u'x':
         assert not el.set(invalid)
-        assert el.value == None
+        assert el.value is None
         assert el.u == invalid
 
 
