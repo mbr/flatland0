@@ -34,3 +34,8 @@ flatland0
 
 flatland0 is a fork of `flatland <https://pypi.python.org/pypi/flatland>`_
 written by Jason Kirtland and currently under development.
+
+There is currently ongoing work of porting all test cases from nose to py.test
+to simplify their structure and get working Python3 support based on that.
+Currently, 675/716 test cases are run on Python3 and the library is usable,
+but should be considered beta quality when not running on Python2.
