@@ -1,5 +1,5 @@
-flatland
-========
+flatland0
+=========
 
 .. image:: https://travis-ci.org/mbr/flatland0.png?branch=master
    :target: https://travis-ci.org/mbr/flatland0
@@ -32,8 +32,8 @@ provided, with rich i18n capabilities for use in HTML, network APIs
 and other environments where user-facing messaging is required.
 
 
-flatland0
----------
+Forked from flatland
+--------------------
 
 flatland0 is a fork of `flatland <https://pypi.python.org/pypi/flatland>`_
 written by Jason Kirtland and currently under development.
