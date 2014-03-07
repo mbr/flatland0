@@ -8,7 +8,7 @@ from genshi.template.base import (
     SUB,
     TemplateSyntaxError,
     _eval_expr,
-    )
+)
 from genshi.template.eval import Expression
 from genshi.template.directives import Directive
 from genshi.template.interpolation import interpolate
@@ -123,7 +123,7 @@ class ControlAttribute(AttributeOnly):
     def inject(self, mapping, ctxt, vars):
         """Inject the translated key and interpolated value into *mapping*."""
         raw = self.raw_value
-        if raw.__class__ is unicode:
+        if raw.__class__ is six.text_type:
             final_value = raw
         else:
             parts = []
@@ -255,7 +255,7 @@ class FlatlandElements(DirectiveFactory):
         ('auto-for', AutoFor),
         ('auto-tabindex', AutoTabindex),
         ('auto-filter', AutoFilter),
-        ]
+    ]
 
 
 def _rewrite_stream(stream, directives, ctxt, vars, bind):
@@ -274,7 +274,7 @@ def _rewrite_stream(stream, directives, ctxt, vars, bind):
     existing_attributes = {}
     for qname, value in attrs:
         if qname.namespace is None:
-            if not isinstance(value, unicode):
+            if not isinstance(value, six.text_type):
                 value = _simplify_stream(value, ctxt, vars)
                 attrs |= ((qname, value),)
             existing_attributes[qname.localname] = qname
@@ -290,7 +290,7 @@ def _rewrite_stream(stream, directives, ctxt, vars, bind):
 
     if new_contents is None:
         new_contents = ()
-    elif isinstance(new_contents, unicode):
+    elif isinstance(new_contents, six.text_type):
         new_contents = [(TEXT, new_contents, (None, -1, -1))]
 
     pairs = sorted(six.iteritems(mutable_attrs), key=_attribute_sort_key)
@@ -371,11 +371,11 @@ def _simplify_stream(stream, ctxt, vars):
                 while hasattr(value, '__next__') or hasattr(value, 'next'):
                     value = list(value)
                     value = _simplify_stream(value, ctxt, vars)
-                if not isinstance(value, unicode):
+                if not isinstance(value, six.text_type):
                     stream[idx:idx + 1] = value
                 else:
                     stream[idx] = (TEXT, value, pos)
-            elif not isinstance(value, unicode):
+            elif not isinstance(value, six.text_type):
                 value = six.text_type(value)
             parts.append(value)
         else:
