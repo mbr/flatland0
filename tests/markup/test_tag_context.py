@@ -1,4 +1,4 @@
-from tests.markup._util import alternate_expectation, desired_output
+from tests.markup._util import desired_output
 
 
 def simple_schema():
