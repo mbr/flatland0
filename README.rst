@@ -28,10 +28,9 @@ A validation system and library of schema-aware validators is also
 provided, with rich i18n capabilities for use in HTML, network APIs
 and other environments where user-facing messaging is required.
 
-Availability
-------------
 
-The hg `flatland tip`_ can be installed via ``easy_install
-flatland==dev``.
+flatland0
+---------
 
-.. _flatland tip: http://bitbucket.org/jek/flatland/get/tip.zip#egg=flatland-dev
+flatland0 is a fork of `flatland <https://pypi.python.org/pypi/flatland>`_
+written by Jason Kirtland and currently under development.
