@@ -3,9 +3,10 @@
 # flatland documentation build configuration file, created by
 # sphinx-quickstart on Wed Sep 17 08:55:12 2008.
 
-import os
 from os import path
 import sys
+
+import sphinx_readable_theme
 
 sys.path.append(path.abspath(path.dirname(__file__) + "../../../"))
 
@@ -18,15 +19,8 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest',
               'sphinx.ext.coverage',
               'sphinx.ext.inheritance_diagram']
 
-html_theme_path = ['.']
-
-try:
-   import dbuilder
-except ImportError:
-   pass
-else:
-   extensions.append('dbuilder')
-   html_theme_path.append(path.join(dbuilder.__path__[0], 'theme'))
+html_theme_path = [sphinx_readable_theme.get_html_theme_path()]
+html_theme = 'readable'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
